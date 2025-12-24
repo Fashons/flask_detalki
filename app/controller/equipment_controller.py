@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from app.model.equipment import EquipmentRepo
 from app.model.user import UserRepo
 from datetime import datetime
-import json
+from app import db
 
 bp = Blueprint("equipment", __name__, url_prefix="/equipment")
 equipment_repo = EquipmentRepo()
@@ -52,11 +52,17 @@ def create_equipment():
         flash("У вас нет прав для добавления оборудования", "error")
         return redirect(url_for('equipment.list_equipment'))
 
+    # Валидация обязательных полей
+    name = request.form.get("name", "").strip()
+    inventory_number = request.form.get("inventory_number", "").strip()
+
+    if not name or not inventory_number:
+        flash("Название и инвентарный номер обязательны для заполнения", "error")
+        return redirect(url_for('equipment.list_equipment'))
+
     try:
-        name = request.form.get("name")
         type_ = request.form.get("type")
         model = request.form.get("model")
-        inventory_number = request.form.get("inventory_number")
         status = request.form.get("status", "available")
         location = request.form.get("location")
         purchase_date = request.form.get("purchase_date")
@@ -82,8 +88,10 @@ def create_equipment():
             specification=specification,
             user_id=user_id
         )
+        # Убедитесь, что здесь точно такой же текст, как в тесте
         flash("Оборудование успешно добавлено!", "success")
     except Exception as e:
+        db.session.rollback()
         flash(f"Ошибка при добавлении оборудования: {str(e)}", "error")
 
     return redirect(url_for('equipment.list_equipment'))
@@ -101,8 +109,13 @@ def delete_equipment(equipment_id):
         flash("Оборудование не найдено", "error")
         return redirect(url_for('equipment.list_equipment'))
 
-    equipment_repo.delete(equipment_id)
-    flash("Оборудование успешно удалено!", "success")
+    try:
+        equipment_repo.delete(equipment_id)
+        flash("Оборудование успешно удалено!", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Ошибка при удалении оборудования: {str(e)}", "error")
+
     return redirect(url_for('equipment.list_equipment'))
 
 
@@ -147,6 +160,7 @@ def update_equipment():
         )
         flash("Оборудование успешно обновлено!", "success")
     except Exception as e:
+        db.session.rollback()
         flash(f"Ошибка при обновлении оборудования: {str(e)}", "error")
 
     return redirect(url_for('equipment.list_equipment'))

@@ -15,13 +15,11 @@ def create_app(config_name='default'):
     db.init_app(app)
     login_manager.init_app(app)
 
-    # Импорт blueprint'ов
     from app.controller.main_controller import bp as main_bp
     from app.controller.equipment_controller import bp as equipment_bp
     from app.controller.auth_controller import bp as auth_bp
     from app.controller.users_controller import bp as users_bp
 
-    # Регистрация blueprint'ов
     app.register_blueprint(main_bp)
     app.register_blueprint(equipment_bp)
     app.register_blueprint(auth_bp)
@@ -33,4 +31,5 @@ def create_app(config_name='default'):
 @login_manager.user_loader
 def load_user(user_id):
     from app.model.user import User
-    return User.query.get(int(user_id))
+    # Исправлено: используем современный метод Session.get() вместо устаревшего Query.get()
+    return db.session.get(User, int(user_id))

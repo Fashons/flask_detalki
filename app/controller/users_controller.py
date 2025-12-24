@@ -1,6 +1,7 @@
 from flask import Blueprint, request, render_template, redirect, url_for, flash
 from flask_login import login_required, current_user
 from app.model.user import UserRepo
+from app import db  # Добавляем импорт db для обработки исключений
 
 bp = Blueprint("users", __name__, url_prefix="/users")
 repo = UserRepo()
@@ -25,16 +26,26 @@ def create_user():
         flash("У вас нет прав для создания пользователей", "error")
         return redirect(url_for('users.list_users'))
 
-    username = request.form.get("username")
-    password = request.form.get("password")
-    role = request.form.get("role", "user")
+    # Валидация обязательных полей
+    username = request.form.get("username", "").strip()
+    password = request.form.get("password", "").strip()
+
+    if not username or not password:
+        flash("Имя пользователя и пароль обязательны для заполнения", "error")
+        return redirect(url_for('users.list_users'))
 
     if repo.get_by_username(username):
         flash("Имя пользователя уже существует", "error")
         return redirect(url_for('users.list_users'))
 
-    repo.add(username, password, role)
-    flash("Пользователь успешно создан!", "success")
+    try:
+        role = request.form.get("role", "user")
+        repo.add(username, password, role)
+        flash("Пользователь успешно создан!", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Ошибка при создании пользователя: {str(e)}", "error")
+
     return redirect(url_for('users.list_users'))
 
 
@@ -45,13 +56,23 @@ def update_user():
         flash("У вас нет прав для обновления пользователей", "error")
         return redirect(url_for('users.list_users'))
 
-    user_id = request.form.get('id')
-    username = request.form.get('new_username')
-    password = request.form.get('new_password')
-    role = request.form.get('new_role')
+    try:
+        user_id = request.form.get('id')
+        username = request.form.get('new_username')
+        password = request.form.get('new_password')
+        role = request.form.get('new_role')
 
-    repo.update(user_id, username=username, password=password, role=role)
-    flash("Пользователь успешно обновлен!", "success")
+        # Валидация обязательных полей
+        if not username:
+            flash("Имя пользователя обязательно для заполнения", "error")
+            return redirect(url_for('users.list_users'))
+
+        repo.update(user_id, username=username, password=password, role=role)
+        flash("Пользователь успешно обновлен!", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Ошибка при обновлении пользователя: {str(e)}", "error")
+
     return redirect(url_for('users.list_users'))
 
 

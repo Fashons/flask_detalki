@@ -1,5 +1,5 @@
 from app import db
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class Equipment(db.Model):
@@ -11,7 +11,7 @@ class Equipment(db.Model):
     inventory_number = db.Column(db.String(50), unique=True, nullable=False)
     status = db.Column(db.String(20), default='available')  # available, in_use, in_repair, retired
     location = db.Column(db.String(100))
-    purchase_date = db.Column(db.Date, default=datetime.utcnow)
+    purchase_date = db.Column(db.Date, default=lambda: datetime.now(timezone.utc).date())
     price = db.Column(db.Float)
     specification = db.Column(db.Text)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
@@ -22,7 +22,7 @@ class Equipment(db.Model):
 
 class EquipmentRepo:
     def all(self):
-        return Equipment.query.all()
+        return db.session.query(Equipment).all()
 
     def add(self, name, type, model, inventory_number, status='available', location=None,
             purchase_date=None, price=None, specification=None, user_id=None):
@@ -43,7 +43,7 @@ class EquipmentRepo:
         return equipment
 
     def delete(self, equipment_id):
-        equipment = Equipment.query.get(equipment_id)
+        equipment = db.session.get(Equipment, equipment_id)
         if equipment:
             db.session.delete(equipment)
             db.session.commit()
@@ -51,7 +51,7 @@ class EquipmentRepo:
 
     def update(self, equipment_id, name=None, type=None, model=None, inventory_number=None,
                status=None, location=None, purchase_date=None, price=None, specification=None, user_id=None):
-        equipment = Equipment.query.get(equipment_id)
+        equipment = db.session.get(Equipment, equipment_id)
         if not equipment:
             return None
 
@@ -80,10 +80,10 @@ class EquipmentRepo:
         return equipment
 
     def get_by_id(self, equipment_id):
-        return Equipment.query.get(equipment_id)
+        return db.session.get(Equipment, equipment_id)
 
     def filter_by(self, type=None, status=None, location=None):
-        query = Equipment.query
+        query = db.session.query(Equipment)
         if type:
             query = query.filter_by(type=type)
         if status:

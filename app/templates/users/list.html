@@ -47,8 +47,8 @@
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
                     {% for category, message in messages %}
-                        <div class="alert alert-{{ category == 'error' and 'danger' or category == 'success' and 'success' or 'info' }}">
-                            <i class="fas fa-{{ category == 'success' and 'check-circle' or category == 'error' and 'exclamation-circle' or 'info-circle' }}"></i>
+                        <div class="alert alert-{{ category == 'error' and 'danger' or category == 'success' and 'success' or 'info' or 'warning' }}">
+                            <i class="fas fa-{{ category == 'success' and 'check-circle' or category == 'error' and 'exclamation-circle' or category == 'warning' and 'exclamation-triangle' or 'info-circle' }}"></i>
                             {{ message }}
                         </div>
                     {% endfor %}

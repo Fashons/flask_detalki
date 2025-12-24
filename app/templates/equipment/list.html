@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мое оборудование • Учет компьютерной техники</title>
+    <title>Моё оборудование • Учет компьютерной техники</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -16,7 +16,7 @@
             </a>
             <nav class="nav-links">
                 <a href="{{ url_for('equipment.list_equipment') }}" class="nav-link active">
-                    <i class="fas fa-list"></i> Оборудование
+                    <i class="fas fa-list"></i> Моё оборудование
                 </a>
                 {% if current_user.role == 'admin' %}
                 <a href="{{ url_for('users.list_users') }}" class="nav-link">
@@ -37,7 +37,7 @@
 
     <div class="container">
         <div class="page-header">
-            <h1 class="page-title">🖥️ Учет компьютерной техники</h1>
+            <h1 class="page-title">🖥️ Моё оборудование</h1>
             <div class="equipment-actions">
                 <a href="{{ url_for('main.index') }}" class="btn btn-outline">
                     <i class="fas fa-home"></i> На главную
@@ -49,8 +49,8 @@
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
                     {% for category, message in messages %}
-                        <div class="alert alert-{{ category == 'error' and 'danger' or category == 'success' and 'success' or 'info' }}">
-                            <i class="fas fa-{{ category == 'success' and 'check-circle' or category == 'error' and 'exclamation-circle' or 'info-circle' }}"></i>
+                        <div class="alert alert-{{ category == 'error' and 'danger' or category == 'success' and 'success' or 'info' or 'warning' }}">
+                            <i class="fas fa-{{ category == 'success' and 'check-circle' or category == 'error' and 'exclamation-circle' or category == 'warning' and 'exclamation-triangle' or 'info-circle' }}"></i>
                             {{ message }}
                         </div>
                     {% endfor %}

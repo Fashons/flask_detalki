@@ -25,23 +25,29 @@ class User(db.Model, UserMixin):
 
 class UserRepo:
     def get_by_username(self, username):
-        return User.query.filter_by(username=username).first()
+        return db.session.query(User).filter_by(username=username).first()
 
     def get_by_id(self, user_id):
-        return User.query.get(user_id)
+        return db.session.get(User, user_id)
 
     def add(self, username, password, role='user'):
+        if not username or not password:
+            raise ValueError("Username and password are required")
+
+        if self.get_by_username(username):
+            raise ValueError("Username already exists")
+
         user = User(username=username, role=role)
         user.set_password(password)
         db.session.add(user)
-        db.session.commit()
+        db.session.commit()  # Убедитесь, что коммит выполняется
         return user
 
     def all(self):
-        return User.query.all()
+        return db.session.query(User).all()
 
     def update(self, user_id, username=None, password=None, role=None):
-        user = User.query.get(user_id)
+        user = db.session.get(User, user_id)
         if not user:
             return None
 
@@ -56,7 +62,7 @@ class UserRepo:
         return user
 
     def delete(self, user_id):
-        user = User.query.get(user_id)
+        user = db.session.get(User, user_id)
         if user:
             db.session.delete(user)
             db.session.commit()
