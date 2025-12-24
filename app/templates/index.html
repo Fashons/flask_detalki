@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Система учета компьютерной техники</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container nav-container">
+            <a href="{{ url_for('main.index') }}" class="logo">
+                <i class="fas fa-laptop"></i>
+                Computer Equipment
+            </a>
+            <nav class="nav-links">
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('equipment.list_equipment') }}" class="nav-link">
+                        <i class="fas fa-list"></i> Оборудование
+                    </a>
+                    {% if current_user.role == 'admin' %}
+                    <a href="{{ url_for('users.list_users') }}" class="nav-link">
+                        <i class="fas fa-users"></i> Пользователи
+                    </a>
+                    {% endif %}
+                {% endif %}
+            </nav>
+            <div class="nav-actions">
+                {% if current_user.is_authenticated %}
+                    <span class="nav-link">
+                        <i class="fas fa-user"></i> {{ current_user.username }} ({{ current_user.role }})
+                    </span>
+                    <a href="{{ url_for('auth.logout') }}" class="btn btn-outline">
+                        <i class="fas fa-sign-out-alt"></i> Выйти
+                    </a>
+                {% else %}
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-primary">
+                        <i class="fas fa-sign-in-alt"></i> Войти
+                    </a>
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-secondary">
+                        <i class="fas fa-user-plus"></i> Регистрация
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+            <section class="hero" style="text-align: center; padding: 4rem 0; margin: 2rem 0;">
+                <h1 class="page-title" style="font-size: 2.5rem; margin-bottom: 1rem;">
+                    <i class="fas fa-laptop-code"></i> Система учета компьютерной техники
+                </h1>
+                <p style="font-size: 1.2rem; color: var(--text-light); margin-bottom: 2rem;">
+                    Эффективное управление оборудованием вашей организации
+                </p>
+                <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+                    {% if authenticated %}
+                        <a href="{{ url_for('equipment.list_equipment') }}" class="btn btn-primary" style="padding: 1rem 2rem; font-size: 1.1rem;">
+                            <i class="fas fa-list"></i> Перейти к работе
+                        </a>
+                    {% else %}
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-primary" style="padding: 1rem 2rem; font-size: 1.1rem;">
+                            <i class="fas fa-user-plus"></i> Создать аккаунт
+                        </a>
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-outline" style="padding: 1rem 2rem; font-size: 1.1rem;">
+                            <i class="fas fa-sign-in-alt"></i> Войти в систему
+                        </a>
+                    {% endif %}
+                </div>
+            </section>
+
+        <div class="messages">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category == 'error' and 'danger' or category == 'success' and 'success' or 'info' }}">
+                            <i class="fas fa-{{ category == 'success' and 'check-circle' or category == 'error' and 'exclamation-circle' or 'info-circle' }}"></i>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+
+        <section class="stats-container">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-laptop"></i>
+                </div>
+                <div class="stat-value">10+</div>
+                <div class="stat-label">Типов оборудования</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-cogs"></i>
+                </div>
+                <div class="stat-value">4</div>
+                <div class="stat-label">Статуса оборудования</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-map-marker-alt"></i>
+                </div>
+                <div class="stat-value">6+</div>
+                <div class="stat-label">Локаций</div>
+            </div>
+        </section>
+
+        <section style="margin: 3rem 0;">
+            <h2 style="font-size: 1.8rem; margin-bottom: 1.5rem; text-align: center; color: var(--text-color);">
+                <i class="fas fa-features"></i> Возможности системы
+            </h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 style="font-size: 1.3rem; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fas fa-plus-circle text-primary"></i> Учет оборудования
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <p>Добавление, редактирование и удаление компьютерной техники с подробными характеристиками.</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3 style="font-size: 1.3rem; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fas fa-user-shield text-primary"></i> Разграничение прав
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <p>Три уровня доступа: администратор, менеджер и пользователь с различными правами.</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3 style="font-size: 1.3rem; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fas fa-chart-bar text-primary"></i> Статистика и отчеты
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <p>Аналитика по состоянию оборудования, местоположению и эффективности использования.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <h3>Computer Equipment</h3>
+                    <p>Современная система для учета компьютерной техники на Flask</p>
+                </div>
+                <div class="footer-links">
+                    <h4>Навигация</h4>
+                    <ul>
+                        <li><a href="{{ url_for('main.index') }}">Главная</a></li>
+                        <li><a href="{{ url_for('auth.login') if not current_user.is_authenticated else url_for('equipment.list_equipment') }}">
+                            {{ current_user.is_authenticated and 'Мое оборудование' or 'Вход' }}
+                        </a></li>
+                        <li><a href="{{ url_for('auth.register') if not current_user.is_authenticated else url_for('auth.logout') }}">
+                            {{ current_user.is_authenticated and 'Выход' or 'Регистрация' }}
+                        </a></li>
+                    </ul>
+                </div>
+                <div class="footer-contact">
+                    <h4>Контакты</h4>
+                    <ul>
+                        <li><i class="fas fa-envelope"></i> support@equipment.com</li>
+                        <li><i class="fas fa-code-branch"></i> Версия 1.0</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Система учета компьютерной техники. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Простая анимация для карточек
+            const cards = document.querySelectorAll('.card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, 300 + index * 100);
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Пользователи • Учет компьютерной техники</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container nav-container">
+            <a href="{{ url_for('main.index') }}" class="logo">
+                <i class="fas fa-laptop"></i>
+                Computer Equipment
+            </a>
+            <nav class="nav-links">
+                <a href="{{ url_for('equipment.list_equipment') }}" class="nav-link">
+                    <i class="fas fa-list"></i> Оборудование
+                </a>
+                <a href="{{ url_for('users.list_users') }}" class="nav-link active">
+                    <i class="fas fa-users"></i> Пользователи
+                </a>
+            </nav>
+            <div class="nav-actions">
+                <span class="nav-link">
+                    <i class="fas fa-user"></i> {{ current_user.username }} ({{ current_user.role }})
+                </span>
+                <a href="{{ url_for('auth.logout') }}" class="btn btn-outline">
+                    <i class="fas fa-sign-out-alt"></i> Выйти
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="page-header">
+            <h1 class="page-title">👥 Управление пользователями</h1>
+            <div class="equipment-actions">
+                <a href="{{ url_for('main.index') }}" class="btn btn-outline">
+                    <i class="fas fa-home"></i> На главную
+                </a>
+            </div>
+        </div>
+
+        <div class="messages">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category == 'error' and 'danger' or category == 'success' and 'success' or 'info' }}">
+                            <i class="fas fa-{{ category == 'success' and 'check-circle' or category == 'error' and 'exclamation-circle' or 'info-circle' }}"></i>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+
+        <!-- Статистика по ролям -->
+        <div class="stats-container mb-4">
+            {% for role, count in role_counts %}
+            <div class="stat-card">
+                <div class="stat-icon">
+                    {% if role == 'admin' %}
+                    <i class="fas fa-user-shield"></i>
+                    {% elif role == 'manager' %}
+                    <i class="fas fa-user-tie"></i>
+                    {% else %}
+                    <i class="fas fa-user"></i>
+                    {% endif %}
+                </div>
+                <div class="stat-value">{{ count }}</div>
+                <div class="stat-label">
+                    {% if role == 'admin' %}
+                    Администраторов
+                    {% elif role == 'manager' %}
+                    Менеджеров
+                    {% else %}
+                    Пользователей
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Форма добавления пользователя -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h2 class="card-title" style="margin: 0;"><i class="fas fa-user-plus"></i> Добавить нового пользователя</h2>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{{ url_for('users.create_user') }}" class="form-row">
+                    <div class="form-group">
+                        <label for="username" class="form-label">Имя пользователя</label>
+                        <input type="text" id="username" name="username" class="form-input" required placeholder="Введите имя пользователя">
+                    </div>
+                    <div class="form-group">
+                        <label for="password" class="form-label">Пароль</label>
+                        <input type="password" id="password" name="password" class="form-input" required placeholder="Введите пароль">
+                    </div>
+                    <div class="form-group">
+                        <label for="role" class="form-label">Роль</label>
+                        <select id="role" name="role" class="form-input" required>
+                            <option value="user">Пользователь</option>
+                            <option value="manager">Менеджер</option>
+                            <option value="admin">Администратор</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="display: flex; align-items: end;">
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">
+                            <i class="fas fa-user-plus"></i> Добавить пользователя
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Форма обновления пользователя -->
+        <div class="card mb-4" style="background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%); border-color: #10b981;">
+            <div class="card-header" style="background: rgba(16, 185, 129, 0.1);">
+                <h2 class="card-title" style="margin: 0; color: #065f46;"><i class="fas fa-sync-alt"></i> Обновить пользователя</h2>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{{ url_for('users.update_user') }}" class="form-row">
+                    <div class="form-group">
+                        <label for="user-id" class="form-label">ID пользователя</label>
+                        <input type="number" id="user-id" name="id" class="form-input" required placeholder="Введите ID пользователя">
+                    </div>
+                    <div class="form-group">
+                        <label for="new-username" class="form-label">Новое имя пользователя</label>
+                        <input type="text" id="new-username" name="new_username" class="form-input" placeholder="Введите новое имя пользователя">
+                    </div>
+                    <div class="form-group">
+                        <label for="new-password" class="form-label">Новый пароль</label>
+                        <input type="password" id="new-password" name="new_password" class="form-input" placeholder="Введите новый пароль">
+                    </div>
+                    <div class="form-group">
+                        <label for="new-role" class="form-label">Новая роль</label>
+                        <select id="new-role" name="new_role" class="form-input">
+                            <option value="">Выберите роль</option>
+                            <option value="user">Пользователь</option>
+                            <option value="manager">Менеджер</option>
+                            <option value="admin">Администратор</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="display: flex; align-items: end;">
+                        <button type="submit" class="btn btn-secondary" style="width: 100%;">
+                            <i class="fas fa-sync-alt"></i> Обновить пользователя
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Список пользователей -->
+        <h2 style="font-size: 1.5rem; margin: 2rem 0 1rem; color: var(--text-color);">📋 Список пользователей</h2>
+        {% if users %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Имя пользователя</th>
+                            <th>Роль</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                            {% if user.username != 'admin' %}
+                            <tr>
+                                <td>{{ user.id }}</td>
+                                <td>{{ user.username }}</td>
+                                <td>
+                                    {% if user.role == 'admin' %}
+                                        <span class="badge badge-danger">Администратор</span>
+                                    {% elif user.role == 'manager' %}
+                                        <span class="badge badge-warning">Менеджер</span>
+                                    {% else %}
+                                        <span class="badge badge-primary">Пользователь</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <form method="post" action="{{ url_for('users.delete_user', user_id=user.id) }}" style="display: inline;">
+                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Вы уверены, что хотите удалить этого пользователя?')">
+                                            <i class="fas fa-trash-alt"></i> Удалить
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h3>Пользователи не найдены</h3>
+                <p>Список пользователей пуст. Добавьте первого пользователя с помощью формы выше.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2025 Система учета компьютерной техники. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

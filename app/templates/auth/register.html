@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация • Учет компьютерной техники</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='auth.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1 class="auth-title">
+                    <i class="fas fa-user-plus"></i> Регистрация
+                </h1>
+                <p class="auth-subtitle">Создайте новый аккаунт для доступа к системе</p>
+            </div>
+            <div class="auth-body">
+                <div class="messages">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category == 'error' and 'danger' or category == 'success' and 'success' or 'info' }}">
+                                    <i class="fas fa-{{ category == 'success' and 'check-circle' or category == 'error' and 'exclamation-circle' or 'info-circle' }}"></i>
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                </div>
+                <form method="POST" action="{{ url_for('auth.register') }}" class="auth-form">
+                    <div class="form-group">
+                        <label for="username" class="form-label">
+                            <i class="fas fa-user"></i> Имя пользователя
+                        </label>
+                        <input type="text" id="username" name="username" class="form-input" required autofocus placeholder="Выберите имя пользователя">
+                    </div>
+                    <div class="form-group">
+                        <label for="password" class="form-label">
+                            <i class="fas fa-lock"></i> Пароль
+                        </label>
+                        <input type="password" id="password" name="password" class="form-input" required placeholder="Создайте надежный пароль">
+                    </div>
+                    <button type="submit" class="submit-btn">
+                        <i class="fas fa-user-plus"></i> Зарегистрироваться
+                    </button>
+                </form>
+                <div class="auth-links">
+                    <a href="{{ url_for('auth.login') }}" class="auth-link">
+                        <i class="fas fa-sign-in-alt"></i> Уже есть аккаунт
+                    </a>
+                    <a href="{{ url_for('main.index') }}" class="btn btn-outline">
+                        <i class="fas fa-home"></i> На главную
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

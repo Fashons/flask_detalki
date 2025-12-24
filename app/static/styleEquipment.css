@@ -1,0 +1,246 @@
+/* ===== МИНИМАЛИСТИЧНЫЙ СТИЛЬ ДЛЯ СТРАНИЦЫ КНИГ ===== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #fff;
+  color: #000;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  padding: 20px;
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+h1 {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 10px;
+  color: #000;
+  font-weight: 400;
+  letter-spacing: -0.5px;
+  border-bottom: 2px solid #000;
+  padding-bottom: 10px;
+}
+
+/* ===== СТИЛИ ЭЛЕМЕНТОВ С ЧЕРНЫМИ КОНТУРАМИ ===== */
+.glass {
+  background-color: #fff;
+  border: 2px solid #000;
+  padding: 24px;
+  transition: all 0.2s ease;
+}
+
+.glass:hover {
+  background-color: #f8f8f8;
+}
+
+/* ===== ФОРМЫ ===== */
+.book-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: end;
+}
+
+.book-form input {
+  flex: 1;
+  min-width: 140px;
+  padding: 10px 15px;
+  border: 2px solid #000;
+  background-color: #fff;
+  color: #000;
+  font-size: 1rem;
+  outline: none;
+  border-radius: 0;
+}
+
+.book-form input::placeholder {
+  color: #666;
+}
+
+.book-form input:focus {
+  background-color: #f8f8f8;
+}
+
+/* ===== КНОПКИ ===== */
+.btn {
+  padding: 10px 18px;
+  border: 2px solid #000;
+  background-color: #fff;
+  color: #000;
+  border-radius: 0;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.btn:hover {
+  background-color: #000;
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.btn-add {
+  background-color: #fff;
+  color: #000;
+  border-color: #000;
+}
+
+.btn-update {
+  background-color: #fff;
+  color: #000;
+  border-color: #000;
+}
+
+/* ===== СПИСОК КНИГ ===== */
+.books-section h2 {
+  font-size: 1.4rem;
+  margin-bottom: 18px;
+  color: #000;
+  font-weight: 400;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid #000;
+  padding-bottom: 8px;
+}
+
+.books-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.books-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.books-list::-webkit-scrollbar-track {
+  background: #f8f8f8;
+  border: 1px solid #000;
+}
+
+.books-list::-webkit-scrollbar-thumb {
+  background: #000;
+  border: 1px solid #000;
+}
+
+.book-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background-color: #fff;
+  border: 2px solid #000;
+  transition: all 0.2s ease;
+}
+
+.book-item:hover {
+  background-color: #f8f8f8;
+}
+
+.book-item span {
+  font-size: 1rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.book-item strong {
+  color: #000;
+  font-weight: 500;
+}
+
+.book-item em {
+  color: #000;
+  font-style: normal;
+  margin-left: 5px;
+}
+
+/* ===== КНОПКА УДАЛЕНИЯ ===== */
+.delete-form {
+  display: flex;
+  align-items: center;
+  margin-left: 16px;
+}
+
+.btn-delete {
+  background: none;
+  border: 2px solid #000;
+  color: #000;
+  font-size: 1.4rem;
+  font-weight: bold;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.btn-delete:hover {
+  background-color: #000;
+  color: #fff;
+  transform: scale(1.1);
+}
+
+/* ===== АДАПТИВНОСТЬ ===== */
+@media (max-width: 768px) {
+  .container {
+    gap: 20px;
+  }
+
+  h1 {
+    font-size: 1.6rem;
+  }
+
+  .book-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .book-form input,
+  .btn {
+    width: 100%;
+  }
+
+  .book-item {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .delete-form {
+    margin-left: 0;
+    margin-top: 8px;
+    align-self: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  h1 {
+    font-size: 1.4rem;
+  }
+
+  .glass {
+    padding: 20px 15px;
+  }
+}

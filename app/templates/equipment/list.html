@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мое оборудование • Учет компьютерной техники</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container nav-container">
+            <a href="{{ url_for('main.index') }}" class="logo">
+                <i class="fas fa-laptop"></i>
+                Computer Equipment
+            </a>
+            <nav class="nav-links">
+                <a href="{{ url_for('equipment.list_equipment') }}" class="nav-link active">
+                    <i class="fas fa-list"></i> Оборудование
+                </a>
+                {% if current_user.role == 'admin' %}
+                <a href="{{ url_for('users.list_users') }}" class="nav-link">
+                    <i class="fas fa-users"></i> Пользователи
+                </a>
+                {% endif %}
+            </nav>
+            <div class="nav-actions">
+                <span class="nav-link">
+                    <i class="fas fa-user"></i> {{ current_user.username }} ({{ current_user.role }})
+                </span>
+                <a href="{{ url_for('auth.logout') }}" class="btn btn-outline">
+                    <i class="fas fa-sign-out-alt"></i> Выйти
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="page-header">
+            <h1 class="page-title">🖥️ Учет компьютерной техники</h1>
+            <div class="equipment-actions">
+                <a href="{{ url_for('main.index') }}" class="btn btn-outline">
+                    <i class="fas fa-home"></i> На главную
+                </a>
+            </div>
+        </div>
+
+        <div class="messages">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category == 'error' and 'danger' or category == 'success' and 'success' or 'info' }}">
+                            <i class="fas fa-{{ category == 'success' and 'check-circle' or category == 'error' and 'exclamation-circle' or 'info-circle' }}"></i>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+
+        <!-- Фильтры -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h2 class="card-title" style="margin: 0;"><i class="fas fa-filter"></i> Фильтры оборудования</h2>
+            </div>
+            <div class="card-body">
+                <form method="get" action="{{ url_for('equipment.list_equipment') }}" class="form-row">
+                    <div class="form-group">
+                        <label for="type-filter" class="form-label">Тип оборудования</label>
+                        <select id="type-filter" name="type" class="form-input">
+                            <option value="">Все типы</option>
+                            {% for type in all_types %}
+                            <option value="{{ type }}" {% if request.args.get('type') == type %}selected{% endif %}>{{ type }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="status-filter" class="form-label">Статус</label>
+                        <select id="status-filter" name="status" class="form-input">
+                            <option value="">Все статусы</option>
+                            {% for status in all_statuses %}
+                            <option value="{{ status }}" {% if request.args.get('status') == status %}selected{% endif %}>
+                                {% if status == 'available' %}Свободно
+                                {% elif status == 'in_use' %}В использовании
+                                {% elif status == 'in_repair' %}В ремонте
+                                {% elif status == 'retired' %}Списано
+                                {% endif %}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="location-filter" class="form-label">Местоположение</label>
+                        <select id="location-filter" name="location" class="form-input">
+                            <option value="">Все локации</option>
+                            {% for location in all_locations %}
+                            <option value="{{ location }}" {% if request.args.get('location') == location %}selected{% endif %}>{{ location }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group" style="display: flex; align-items: end;">
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">
+                            <i class="fas fa-filter"></i> Применить фильтры
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Форма добавления оборудования -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h2 class="card-title" style="margin: 0;"><i class="fas fa-plus-circle"></i> Добавить новое оборудование</h2>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{{ url_for('equipment.create_equipment') }}" class="form-row">
+                    <div class="form-group">
+                        <label for="name" class="form-label">Название</label>
+                        <input type="text" id="name" name="name" class="form-input" required placeholder="Введите название оборудования">
+                    </div>
+                    <div class="form-group">
+                        <label for="type" class="form-label">Тип</label>
+                        <select id="type" name="type" class="form-input" required>
+                            <option value="">Выберите тип</option>
+                            {% for type in all_types %}
+                            <option value="{{ type }}">{{ type }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="model" class="form-label">Модель</label>
+                        <input type="text" id="model" name="model" class="form-input" required placeholder="Введите модель">
+                    </div>
+                    <div class="form-group">
+                        <label for="inventory_number" class="form-label">Инвентарный номер</label>
+                        <input type="text" id="inventory_number" name="inventory_number" class="form-input" required placeholder="Введите инвентарный номер">
+                    </div>
+                    <div class="form-group">
+                        <label for="location" class="form-label">Местоположение</label>
+                        <select id="location" name="location" class="form-input">
+                            <option value="">Не указано</option>
+                            {% for location in all_locations %}
+                            <option value="{{ location }}">{{ location }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group" style="display: flex; align-items: end;">
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">
+                            <i class="fas fa-laptop"></i> Добавить оборудование
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Форма обновления оборудования -->
+        {% if current_user.role in ['admin', 'manager'] %}
+        <div class="card mb-4" style="background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%); border-color: #10b981;">
+            <div class="card-header" style="background: rgba(16, 185, 129, 0.1);">
+                <h2 class="card-title" style="margin: 0; color: #065f46;"><i class="fas fa-sync-alt"></i> Обновить оборудование</h2>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{{ url_for('equipment.update_equipment') }}" class="form-row">
+                    <div class="form-group">
+                        <label for="equipment-id" class="form-label">ID оборудования</label>
+                        <input type="number" id="equipment-id" name="id" class="form-input" required placeholder="Введите ID оборудования">
+                    </div>
+                    <div class="form-group">
+                        <label for="new-name" class="form-label">Новое название</label>
+                        <input type="text" id="new-name" name="new_name" class="form-input" placeholder="Введите новое название">
+                    </div>
+                    <div class="form-group">
+                        <label for="new-type" class="form-label">Новый тип</label>
+                        <select id="new-type" name="new_type" class="form-input">
+                            <option value="">Выберите тип</option>
+                            {% for type in all_types %}
+                            <option value="{{ type }}">{{ type }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="new-model" class="form-label">Новая модель</label>
+                        <input type="text" id="new-model" name="new_model" class="form-input" placeholder="Введите новую модель">
+                    </div>
+                    <div class="form-group">
+                        <label for="new-inventory_number" class="form-label">Новый инвентарный номер</label>
+                        <input type="text" id="new-inventory_number" name="new_inventory_number" class="form-input" placeholder="Введите новый инвентарный номер">
+                    </div>
+                    <div class="form-group">
+                        <label for="new-status" class="form-label">Новый статус</label>
+                        <select id="new-status" name="new_status" class="form-input">
+                            <option value="">Выберите статус</option>
+                            {% for status in all_statuses %}
+                            <option value="{{ status }}">
+                                {% if status == 'available' %}Свободно
+                                {% elif status == 'in_use' %}В использовании
+                                {% elif status == 'in_repair' %}В ремонте
+                                {% elif status == 'retired' %}Списано
+                                {% endif %}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="new-location" class="form-label">Новое местоположение</label>
+                        <select id="new-location" name="new_location" class="form-input">
+                            <option value="">Не указано</option>
+                            {% for location in all_locations %}
+                            <option value="{{ location }}">{{ location }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group" style="display: flex; align-items: end;">
+                        <button type="submit" class="btn btn-secondary" style="width: 100%;">
+                            <i class="fas fa-sync-alt"></i> Обновить оборудование
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Статистика -->
+        <div class="stats-container mb-4">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-laptop"></i>
+                </div>
+                <div class="stat-value">{{ type_counts|length or 0 }}</div>
+                <div class="stat-label">Типов оборудования</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-chart-pie"></i>
+                </div>
+                <div class="stat-value">{{ status_counts|length or 0 }}</div>
+                <div class="stat-label">Статусов</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-map-marker-alt"></i>
+                </div>
+                <div class="stat-value">{{ all_locations|length or 0 }}</div>
+                <div class="stat-label">Локаций</div>
+            </div>
+        </div>
+
+        <!-- Список оборудования -->
+        <h2 style="font-size: 1.5rem; margin: 2rem 0 1rem; color: var(--text-color);">📋 Список оборудования</h2>
+        {% if equipment %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Название</th>
+                            <th>Тип</th>
+                            <th>Модель</th>
+                            <th>Инвентарный номер</th>
+                            <th>Статус</th>
+                            <th>Местоположение</th>
+                            {% if current_user.role == 'admin' %}
+                            <th>Действия</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in equipment %}
+                            <tr>
+                                <td>{{ item.id }}</td>
+                                <td>{{ item.name }}</td>
+                                <td>{{ item.type }}</td>
+                                <td>{{ item.model }}</td>
+                                <td>{{ item.inventory_number }}</td>
+                                <td>
+                                    {% if item.status == 'available' %}
+                                        <span class="badge badge-success">Свободно</span>
+                                    {% elif item.status == 'in_use' %}
+                                        <span class="badge badge-primary">В использовании</span>
+                                    {% elif item.status == 'in_repair' %}
+                                        <span class="badge badge-warning">В ремонте</span>
+                                    {% elif item.status == 'retired' %}
+                                        <span class="badge badge-danger">Списано</span>
+                                    {% else %}
+                                        <span class="badge badge-info">{{ item.status }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ item.location or 'Не указано' }}</td>
+                                {% if current_user.role == 'admin' %}
+                                <td>
+                                    <form method="post" action="{{ url_for('equipment.delete_equipment', equipment_id=item.id) }}" style="display: inline;">
+                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Вы уверены, что хотите удалить это оборудование?')">
+                                            <i class="fas fa-trash-alt"></i> Удалить
+                                        </button>
+                                    </form>
+                                </td>
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i class="fas fa-box-open"></i>
+                </div>
+                <h3>Оборудование не найдено</h3>
+                <p>Список оборудования пуст. Добавьте первое оборудование с помощью формы выше.</p>
+                <a href="#" class="btn btn-primary" onclick="document.querySelector('#name').focus(); return false;">
+                    <i class="fas fa-plus"></i> Добавить оборудование
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2025 Система учета компьютерной техники. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Автофокус на поле названия при загрузке страницы
+            if (document.getElementById('name')) {
+                document.getElementById('name').focus();
+            }
+
+            // Обработка формы обновления - заполнение полей при выборе ID
+            const equipmentIdInput = document.getElementById('equipment-id');
+            if (equipmentIdInput) {
+                equipmentIdInput.addEventListener('change', function() {
+                    const equipmentId = this.value;
+                    if (equipmentId) {
+                        // Здесь можно добавить AJAX-запрос для получения данных оборудования по ID
+                        console.log('Выбрано оборудование с ID: ' + equipmentId);
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
