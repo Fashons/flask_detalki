@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: flask_equipment_app
+    ports:
+      - "5000:5000"
+    volumes:
+      # Сохраняем базу данных между перезапусками
+      - ./instance:/app/instance
+      - ./app/instance:/app/app/instance  # Сохраняем БД на хосте
+      # Монтируем исходный код для разработки (опционально)
+      - ./app:/app/app
+      - ./templates:/app/templates
+      - ./static:/app/static
+    environment:
+      - FLASK_APP=run.py
+      - FLASK_ENV=production
+      - SECRET_KEY=your-secret-key-here
+    restart: unless-stopped
+    networks:
+      - equipment_network
+
+networks:
+  equipment_network:
+    driver: bridge

@@ -1,0 +1,42 @@
+# Виртуальное окружение
+.venv/
+venv/
+env/
+
+# Python кэш
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# База данных SQLite
+*.db
+*.sqlite
+*.sqlite3
+instance/
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# Тесты и документация
+tests/
+*.md
+docs/
+
+# Статические файлы сборки (если есть)
+*.log
+.pytest_cache/
+.coverage
+htmlcov/

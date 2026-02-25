@@ -13,4 +13,5 @@ with app.app_context():
         db.session.commit()
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    # Для Docker важно слушать все интерфейсы
+    app.run(host='0.0.0.0', port=5000, debug=True)
